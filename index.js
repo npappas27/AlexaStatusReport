@@ -43,18 +43,12 @@ var continuedText;
             return 'error';
         } 
         else {
-            //console.log(data.Items[0].info);
             callback(data.Items[0].info);
-            
         }
     });
 }
 
 
-
-
-
-// https://stackoverflow.com/questions/48638353/how-to-handle-synonyms-in-intents-in-alexa 
 function slotValue(slot, useId){
     let value = slot.value;
     let resolution = (slot.resolutions && slot.resolutions.resolutionsPerAuthority && slot.resolutions.resolutionsPerAuthority.length > 0) ? slot.resolutions.resolutionsPerAuthority[0] : null;
@@ -67,7 +61,7 @@ function slotValue(slot, useId){
 }
 
 
-
+// Shortens the text returned from the database, and then asks if user wants to hear more
 function ParseInfo(infoText, callback) {
     var textLength = 25;
     if(infoText.length >= textLength) {
@@ -85,7 +79,7 @@ function ParseInfo(infoText, callback) {
     
 const handlers = {
     
-
+    //invoked when a user says: "Alexa, status report"
     'LaunchRequest': function () {
         var examples = ['read Progressive status report.',
                         'read Q1 status report.',
@@ -95,6 +89,7 @@ const handlers = {
         this.emit(':ask', 'I need more info first. Say things like: ' + myExample);
     },
 
+    //invoked when a user says: "read {company} status report for {quarter} {year}" or something similar
     'Update': function () {
 
         var year = this.event.request.intent.slots.Year.value;
@@ -104,11 +99,11 @@ const handlers = {
         var confirm = this.event.request.intent.slots.Yes.value;
         if(!confirm){
             console.log(year + ' ' + quarterName + ' ' + ' ' + department);
+            // assign slot values if not explicitly given by user
             if((year === undefined || year === "?") || quarterName === undefined || department === undefined){
                 this.emit(':delegate');
             }
             else{
-            
                 var self = this;
                 GetData(quarterName, parseInt(year), department, function(info){
                     ParseInfo(info, function(info, isMore){
